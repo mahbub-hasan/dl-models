@@ -20,15 +20,18 @@ class MultiHeadAttention(nn.Module):
         assert self.config.image_embedding % self.config.attention_head == 0
 
         query_state = self.query(x).view(batch_size, seq_len, self.config.attention_head,
-                                         self.config.image_embedding//self.config.attention_head).transpose(1, 2)
+                                         self.config.image_embedding // self.config.attention_head).transpose(1, 2)
         key_state = self.key(x).view(batch_size, seq_len, self.config.attention_head,
-                                     self.config.image_embedding//self.config.attention_head).transpose(1, 2)
+                                     self.config.image_embedding // self.config.attention_head).transpose(1, 2)
         value_state = self.value(x).view(batch_size, seq_len, self.config.attention_head,
-                                         self.config.image_embedding//self.config.attention_head).transpose(1, 2)
+                                         self.config.image_embedding // self.config.attention_head).transpose(1, 2)
 
-        attention_score = torch.softmax(torch.matmul(query_state, key_state.transpose(2, 3))/math.sqrt(self.config.image_embedding), dim=-1)
+        attention_score = torch.softmax(
+            torch.matmul(query_state, key_state.transpose(2, 3)) / math.sqrt(self.config.image_embedding), dim=-1)
 
-        attention_output = torch.matmul(value_state, attention_score).reshape(batch_size, seq_len, embed_dim).contiguous()
+        attention_output = torch.matmul(attention_score, value_state)
+        attention_output = attention_output.transpose(1, 2).contiguous()
+        attention_output = attention_output.reshape(batch_size, seq_len, embed_dim)
 
         return attention_output
 
@@ -70,7 +73,6 @@ class TransformerEncoder(nn.Module):
     def __init__(self, config: ProjectConfiguration):
         super(TransformerEncoder, self).__init__()
         self.config = config
-
         self.encoder_layers = nn.ModuleList([ViTImageTransformer(config=config) for _ in range(config.attention_layer)])
 
     def forward(self, image):
