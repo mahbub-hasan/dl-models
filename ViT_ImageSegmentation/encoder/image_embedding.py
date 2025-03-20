@@ -11,10 +11,12 @@ class ImagePatching(nn.Module):
                                    out_channels=config.image_embedding,
                                    kernel_size=config.patch_size,
                                    stride=config.patch_size)
+        self.flatten = nn.Flatten(start_dim=2, end_dim=3)
 
     def forward(self, x):
         x = self.img_patch(x)
-        x = x.reshape(x.shape[0], x.shape[1], -1).transpose(1, 2)
+        x = self.flatten(x)
+        x = x.transpose(1, 2)
         return x
 
 
@@ -25,7 +27,7 @@ class ImageEmbedding(nn.Module):
         self.number_of_patch = (config.image_size//config.patch_size)**2
         self.image_patch = ImagePatching(config=config)
         # create cls_token
-        self.class_token = nn.Parameter(torch.randn(size=(1, 1, config.image_embedding)),
+        self.class_token = nn.Parameter(torch.randn(size=(1, config.image_channel, config.image_embedding)),
                                         requires_grad=True)
         # create positional embedding
         self.pos_embd = nn.Parameter(torch.randn(size=(1, self.number_of_patch+1, config.image_embedding)),

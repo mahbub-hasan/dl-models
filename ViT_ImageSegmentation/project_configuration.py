@@ -1,11 +1,11 @@
 class ProjectConfiguration:
     def __init__(self,
                  image_size: int = 224,
-                 image_channel: int = 3,
+                 image_channel: int = 1,
                  patch_size: int = 16,
                  attention_head: int = 4,
                  attention_layer: int = 12,
-                 batch_size: int = 32,
+                 batch_size: int = 1,
                  eps: float = 1e-6,
                  hidden_layer: int = 2048,
                  dropout: float = 0.2,
