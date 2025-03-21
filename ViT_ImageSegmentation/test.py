@@ -7,6 +7,7 @@ from data_prepare.make_dataset import MakeDataset
 from model_build.model import BuildModel
 from model_build.dice_accuracy import DiceAccuracy
 from model_build.train_loop import TrainLoop
+from torchinfo import summary
 
 if __name__ == '__main__':
     # define project configuration
@@ -33,6 +34,9 @@ if __name__ == '__main__':
 
     # now it's time to build the model
     model = BuildModel(config=config)
+
+    # print model summary
+    summary(model, input_size=(config.batch_size,config.image_channel, config.image_size, config.image_size))
 
     # let's define loss and optimizer for the model
     loss_fn = nn.BCEWithLogitsLoss()
